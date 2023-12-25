@@ -47,6 +47,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.integration:spring-integration-http'
     implementation 'org.springframework.integration:spring-integration-jpa'
+    implementation 'com.h2database:h2'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'

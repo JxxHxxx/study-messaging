@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 
 @Getter
 @Entity
@@ -17,10 +15,10 @@ public class MessageQ {
     @Column(name = "message_id")
     private Long messageId;
 
-    @Column(name = "value")
-    private String value;
+    @Column(name = "body")
+    private String body;
 
-    public MessageQ(String value) {
-        this.value = value;
+    public MessageQ(String body) {
+        this.body = body;
     }
 }
