@@ -13,10 +13,17 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    @GetMapping("/call")
-    public String call() {
-        log.info("call MessageController ");
-        messageService.call();
-        return "호출 완료";
+    @GetMapping("/send")
+    public String send() throws InterruptedException {
+        log.info("request send()");
+        messageService.sendMessageToChannel();
+        return "송신 완료";
+    }
+
+    @GetMapping("/receive")
+    public String receive() throws InterruptedException {
+        log.info("request receive()");
+        messageService.receiveMessage();
+        return "수신 완료";
     }
 }

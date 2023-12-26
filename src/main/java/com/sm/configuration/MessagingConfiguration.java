@@ -10,15 +10,16 @@ import org.springframework.integration.core.MessagingTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
-@Configuration
+//@Configuration
 public class MessagingConfiguration {
 
     private final LoggingChannelInterceptor channelInterceptor;
+    private final int queueCapacity = 2;
 
     @Bean
     public QueueChannel queueChannel() {
-        QueueChannel queueChannel = new QueueChannel();
-        queueChannel.addInterceptor(channelInterceptor);
+        QueueChannel queueChannel = new QueueChannel(queueCapacity);
+//        queueChannel.addInterceptor(channelInterceptor);
         queueChannel.afterPropertiesSet();
 
         return queueChannel;
@@ -26,9 +27,10 @@ public class MessagingConfiguration {
 
     @Bean
     public MessagingTemplate messagingTemplate() {
-        return new MessagingTemplate(queueChannel());
+        MessagingTemplate messagingTemplate = new MessagingTemplate(queueChannel());
+        messagingTemplate.setReceiveTimeout(1000);
+        messagingTemplate.setSendTimeout(1000);
+        messagingTemplate.setThrowExceptionOnLateReply(true);
+        return messagingTemplate;
     }
-
-
-
 }
