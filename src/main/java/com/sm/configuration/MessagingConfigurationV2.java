@@ -90,14 +90,4 @@ public class MessagingConfigurationV2 {
         messagingTemplate.setThrowExceptionOnLateReply(true);
         return messagingTemplate;
     }
-
-    @Bean
-    @ServiceActivator(inputChannel = "routingChannel")
-    public PayloadTypeRouter router() {
-        PayloadTypeRouter router = new PayloadTypeRouter();
-        router.setChannelMapping(String.class.getName(), "channel1");
-        router.setChannelMapping(Integer.class.getName(), "channel2");
-        router.afterPropertiesSet();
-        return router;
-    }
 }

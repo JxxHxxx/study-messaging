@@ -34,7 +34,7 @@ public class SimpleMessageProducer {
 
     private static final String[] fruits = {"strawberry", "apple", "melon", "orange"};
     //여기가 뭔가 잘못됐음...
-    @InboundChannelAdapter(channel = "routingChannel", poller = @Poller(fixedRate = "1000"))
+    @InboundChannelAdapter(channel = "routingChannel", poller = @Poller(fixedRate = "500"))
     public Message<?> provideToRoutingChannel() {
 
         log.info("routingChannel call");
@@ -42,12 +42,14 @@ public class SimpleMessageProducer {
         if (result == 1) {
             return MessageBuilder
                     .withPayload(random.nextInt(100))
+                    .setHeader("SID", "NUMBER")
                     .build();
         }
         else {
             int idx = random.nextInt(4);
             return MessageBuilder
                     .withPayload(fruits[idx])
+                    .setHeader("SID", "FRUIT")
                     .build();
         }
     }
