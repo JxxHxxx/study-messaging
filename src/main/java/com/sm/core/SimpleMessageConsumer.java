@@ -1,23 +1,21 @@
 package com.sm.core;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @MessageEndpoint
-public class SimpleMessageEndpoint {
+public class SimpleMessageConsumer {
 
-    @ServiceActivator(inputChannel = "queueChannel")
+    @ServiceActivator(inputChannel = "channel1")
     public void handle1(String fruit) {
         log.info("fruit name {}" , fruit);
     }
 
 
-    @ServiceActivator(inputChannel = "priorityChannel")
-    public void handle2(String fruit) {
-        log.info("fruit name {}" , fruit);
+    @ServiceActivator(inputChannel = "channel2")
+    public void handle2(Integer number) {
+        log.info("number name {}" , number);
     }
 }
