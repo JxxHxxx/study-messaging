@@ -12,6 +12,7 @@ import org.springframework.integration.endpoint.MethodInvokingMessageSource;
 import org.springframework.integration.handler.MethodInvokingMessageHandler;
 import org.springframework.integration.jdbc.JdbcPollingChannelAdapter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -31,29 +32,35 @@ public class SimpleMessageProducer {
 
     private static final Random random = new Random();
 
+    private static final String[] fruits = {"strawberry", "apple", "melon", "orange"};
     //여기가 뭔가 잘못됐음...
     @InboundChannelAdapter(channel = "routingChannel", poller = @Poller(fixedRate = "1000"))
-    public Object provideToRoutingChannel() {
+    public Message<?> provideToRoutingChannel() {
+
         log.info("routingChannel call");
         int result = random.nextInt(2);
         if (result == 1) {
-            return random.nextInt(100);
+            return MessageBuilder
+                    .withPayload(random.nextInt(100))
+                    .build();
         }
         else {
-            return "strawberry";
+            int idx = random.nextInt(4);
+            return MessageBuilder
+                    .withPayload(fruits[idx])
+                    .build();
         }
     }
 
-    @InboundChannelAdapter(channel = "channel1", poller = @Poller(fixedRate = "1000"))
-    public String provideToChannel1() {
-        log.info("channel1 queue size {}", channel1.getQueueSize());
-        return null;
-    }
-
-    @InboundChannelAdapter(channel = "channel2", poller = @Poller(fixedRate = "500"))
-    public Integer provideToChannel2() {
-        log.info("channel2 queue size {}", channel2.getQueueSize());
-        return null;
-    }
-
+//    @InboundChannelAdapter(channel = "channel1", poller = @Poller(fixedRate = "1000"))
+//    public String provideToChannel1() {
+//        log.info("channel1 queue size {}", channel1.getQueueSize());
+//        return null;
+//    }
+//
+//    @InboundChannelAdapter(channel = "channel2", poller = @Poller(fixedRate = "500"))
+//    public Integer provideToChannel2() {
+//        log.info("channel2 queue size {}", channel2.getQueueSize());
+//        return null;
+//    }
 }
