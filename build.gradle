@@ -51,13 +51,14 @@ dependencies {
     implementation 'org.springframework.integration:spring-integration-jdbc'
 
     runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
-    implementation 'com.h2database:h2'
-//    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.integration:spring-integration-test'
+    testImplementation 'com.h2database:h2'
 }
 
 tasks.named('bootBuildImage') {

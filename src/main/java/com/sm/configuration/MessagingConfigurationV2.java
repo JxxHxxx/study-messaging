@@ -28,16 +28,10 @@ import static org.springframework.boot.jdbc.DatabaseDriver.SQLSERVER;
 
 @Slf4j
 @RequiredArgsConstructor
-@Configuration
+//@Configuration
 public class MessagingConfigurationV2 {
 
     private final DataSource dataSource;
-    private static final int QUEUE_CAPACITY = 10;
-
-    private static final String DATABASE_DRIVER_CLASS_PROPERTY_KEY = "spring.datasource.driver-class-name";
-    private static final String MESSAGE_TABLE_PREFIX = "JX_";
-    private final Environment env;
-
     @Bean(name = "routingChannel")
     public QueueChannel routingChannel() {
         return new QueueChannel(100);
@@ -59,27 +53,10 @@ public class MessagingConfigurationV2 {
     @Bean
     public ChannelMessageStore channelMessageStore() {
         JdbcChannelMessageStore messageStore = new JdbcChannelMessageStore(dataSource);
-
-        messageStore.setChannelMessageStoreQueryProvider(selectChannelMessageStoreQueryProvider());
+        messageStore.setChannelMessageStoreQueryProvider(new MySqlChannelMessageStoreQueryProvider());
         messageStore.afterPropertiesSet();
 
         return messageStore;
-    }
-
-    private ChannelMessageStoreQueryProvider selectChannelMessageStoreQueryProvider() {
-        String databaseDriverClass = env.getProperty(DATABASE_DRIVER_CLASS_PROPERTY_KEY);
-
-        if (Objects.isNull(databaseDriverClass)) {
-            log.error("{} must be not null", DATABASE_DRIVER_CLASS_PROPERTY_KEY);
-            throw new YAMLException(DATABASE_DRIVER_CLASS_PROPERTY_KEY + "must be not null");
-        }
-
-        if (SQLSERVER.getDriverClassName().equals(databaseDriverClass)) {
-            log.info("selected {} for ChannelMessageStoreQueryProvider ",SQLSERVER.getDriverClassName());
-            return new SqlServerChannelMessageStoreQueryProvider();
-        }
-        log.info("selected {} for ChannelMessageStoreQueryProvider ",MYSQL.getDriverClassName());
-        return new MySqlChannelMessageStoreQueryProvider();
     }
 
     @Bean

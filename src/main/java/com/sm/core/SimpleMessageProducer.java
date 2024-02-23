@@ -1,21 +1,19 @@
 package com.sm.core;
 
-import lombok.Data;
+import com.sm.infra.Store;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.InboundChannelAdapter;
 import org.springframework.integration.annotation.Poller;
-import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.core.MessageSource;
-import org.springframework.integration.endpoint.MethodInvokingMessageSource;
-import org.springframework.integration.handler.MethodInvokingMessageHandler;
-import org.springframework.integration.jdbc.JdbcPollingChannelAdapter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Slf4j
@@ -23,46 +21,68 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class SimpleMessageProducer {
 
-    @Qualifier(value = "channel1")
-    private final QueueChannel channel1;
-    @Qualifier(value = "channel2")
-    private final QueueChannel channel2;
-
-    private final DataSource dataSource;
-
     private static final Random random = new Random();
+    private static Long messageId = 0l;
 
-    private static final String[] fruits = {"strawberry", "apple", "melon", "orange"};
-    //여기가 뭔가 잘못됐음...
-    @InboundChannelAdapter(channel = "routingChannel", poller = @Poller(fixedRate = "500"))
-    public Message<?> provideToRoutingChannel() {
+    @Value("${message.produce.size}")
+    private int produceSize;
 
-        log.info("routingChannel call");
+    @InboundChannelAdapter(channel = "splitChannel",
+            poller = @Poller(fixedDelay = "${message.produce.polling.interval}",
+                             taskExecutor = "inboundTaskExecutor"))
+    public List<Message<?>> produce1() {
+        Integer producerId = 2;
+        List<String> messageIdContainer = new ArrayList<>();
+
+        List<Message<?>> messages = new ArrayList<>();
+        for (int i = 0; i < produceSize; i++) {
+            Message<?> message = produceMessage(producerId);
+            messages.add(message);
+            messageIdContainer.add(getMessageId(message));
+        }
+        log.info("[PRODUCER-{}][TO:ROUTING_CHANNEL][MSG ID:{}]", producerId, messageIdContainer);
+
+        return messages;
+    }
+
+    @InboundChannelAdapter(channel = "splitChannel", poller = @Poller(fixedDelay = "${message.produce.polling.interval}"))
+    public List<Message<?>> produce2() {
+        Integer producerId = 2;
+        List<String> messageIdContainer = new ArrayList<>();
+
+        List<Message<?>> messages = new ArrayList<>();
+        for (int i = 0; i < produceSize; i++) {
+            Message<?> message = produceMessage(producerId);
+            messages.add(message);
+            messageIdContainer.add(getMessageId(message));
+        }
+        log.info("[PRODUCER-{}][TO:ROUTING_CHANNEL][MSG ID:{}]", producerId, messageIdContainer);
+        return messages;
+    }
+
+    private static String getMessageId(Message<?> message) {
+        MessageHeaders headers = message.getHeaders();
+        return String.valueOf(headers.get("MSGID"));
+    }
+
+    private Message<? extends Serializable> produceMessage(int producerId) {
         int result = random.nextInt(2);
         if (result == 1) {
             return MessageBuilder
                     .withPayload(random.nextInt(100))
+                    .setHeader("MSGID", messageId++)
+                    .setHeader("PDID", producerId)
                     .setHeader("SID", "NUMBER")
                     .build();
         }
         else {
             int idx = random.nextInt(4);
             return MessageBuilder
-                    .withPayload(fruits[idx])
+                    .withPayload(Store.FRUITS[idx])
+                    .setHeader("MSGID", messageId++)
+                    .setHeader("PDID", producerId)
                     .setHeader("SID", "FRUIT")
                     .build();
         }
     }
-
-//    @InboundChannelAdapter(channel = "channel1", poller = @Poller(fixedRate = "1000"))
-//    public String provideToChannel1() {
-//        log.info("channel1 queue size {}", channel1.getQueueSize());
-//        return null;
-//    }
-//
-//    @InboundChannelAdapter(channel = "channel2", poller = @Poller(fixedRate = "500"))
-//    public Integer provideToChannel2() {
-//        log.info("channel2 queue size {}", channel2.getQueueSize());
-//        return null;
-//    }
 }
